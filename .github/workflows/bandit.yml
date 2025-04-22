@@ -13,9 +13,6 @@ jobs:
       contents: read
 
     steps:
-      - name: 📥 Cloner le dépôt
-        uses: actions/checkout@v3
-
       - name: 🔍 Exécuter Bandit
         uses: PyCQA/bandit-action@v1
         with:
