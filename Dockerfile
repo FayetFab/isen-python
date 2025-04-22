@@ -1,8 +1,6 @@
-
 FROM python:3.9-slim-buster
 
 RUN useradd -m user1
-
 USER user1
 
 WORKDIR /app

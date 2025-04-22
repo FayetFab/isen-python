@@ -21,9 +21,6 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: ♻️ Exporter la variable DOCKERHUB_USERNAME
-        run: echo "DOCKERHUB_USERNAME=${{ vars.DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
-
       - name: Build de l’image Docker 
         run: |
           docker build -t ${{ vars.DOCKERHUB_USERNAME }}/mon-app:dev-${{ github.sha }} .
@@ -33,7 +30,7 @@ jobs:
           docker push ${{ vars.DOCKERHUB_USERNAME }}/mon-app:dev-${{ github.sha }}
 
       - name: Scan de sécurité avec Trivy
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.12.0
         with:
           image-ref: '${{ vars.DOCKERHUB_USERNAME }}/mon-app:dev-${{ github.sha }}'
           format: 'table'
