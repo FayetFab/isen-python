@@ -1,7 +1,11 @@
 name: Bandit
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [ part1 ]  # ou remplace par ['*'] pour tous les branches
+  pull_request:
+    branches: [ part1 ]
+  workflow_dispatch:  # conserve la possibilité de lancer manuellement
 
 jobs:
   analyze:
@@ -15,3 +19,6 @@ jobs:
     steps:
       - name: Perform Bandit Analysis
         uses: PyCQA/bandit-action@v1
+        with:
+          # Exclure le dossier contenant les tests
+          exclude: ".github/workflows/tests"
