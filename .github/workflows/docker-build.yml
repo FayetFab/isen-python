@@ -24,11 +24,13 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         
-      - name: Build & Push de l’image Docker 
+      - name: Build de l’image Docker 
         run: |
-          docker buildx build --platform linux/amd64 \
-          -t ${{ vars.DOCKERHUB_USERNAME }}/mon-app:dev-${{ github.sha }} \
-          --push .  # ou --load si tu veux le charger localement
+          docker build -t ${{ vars.DOCKERHUB_USERNAME }}/mon-app:dev-${{ github.sha }} .
+
+      - name: Push de l’image vers Docker Hub
+        run: |
+          docker push ${{ vars.DOCKERHUB_USERNAME }}/mon-app:dev-${{ github.sha }}
 
       # - name: Scan de sécurité avec Trivy
       #   uses: aquasecurity/trivy-action@master
