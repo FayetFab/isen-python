@@ -15,7 +15,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker buildx build -t ${{ vars.DOCKERHUB_USERNAME }}/myapp:dev-${{ github.sha }} .
+          docker build -t ${{ vars.DOCKERHUB_USERNAME }}/myapp:dev-${{ github.sha }} .
 
       - name: Push Docker image
         run: |
