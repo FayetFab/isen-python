@@ -41,3 +41,46 @@ jobs:
           severity: 'CRITICAL,HIGH'
         continue-on-error: true
 
+# name: Build & Push Docker Image + Security Scan 
+
+# on:
+#   push:
+#     branches: [ part1 ]
+#   pull_request:
+#     branches: [ part1 ]
+
+# jobs:
+#   build-and-scan:
+#     runs-on: ubuntu-latest
+#     name: Docker Build & Sécu Scan
+
+#     steps:
+#       - name: Checkout du code
+#         uses: actions/checkout@v4
+
+#       - name: Connexion à DockerHub
+#         uses: docker/login-action@v2
+#         with:
+#           username: ${{ vars.DOCKERHUB_USERNAME }}
+#           password: ${{ secrets.DOCKERHUB_TOKEN }}
+        
+#       - name: Build de l’image Docker 
+#         uses: docker/build-push-action@v3
+#         with:
+#           context: .
+#           push: true
+#           tags: ${{ vars.DOCKERHUB_USERNAME }}/my-app:dev-${{ github.sha }}
+
+#       - name: Push de l’image vers Docker Hub
+#         run: |
+#           docker push ${{ vars.DOCKERHUB_USERNAME }}/my-app:dev-${{ github.sha }}
+#       - name: Scan de sécurité avec Trivy
+#         uses: aquasecurity/trivy-action@master
+#         with:
+#           image-ref: '${{ vars.DOCKERHUB_USERNAME }}/my-app:dev-${{ github.sha }}'
+#           format: 'table'
+#           vuln-type: 'os,library'
+#           severity: 'CRITICAL,HIGH'
+#         continue-on-error: true
+
+# Update docker-build.yml · FayetFab/isen-python@6c1a16b
