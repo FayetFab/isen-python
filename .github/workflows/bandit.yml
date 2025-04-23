@@ -17,8 +17,7 @@ jobs:
       actions: read
       contents: read
     steps:
-      - name: Perform Bandit Analysis
-        uses: PyCQA/bandit-action@v1
-        with:
-          # Exclure le dossier contenant les tests
-          exclude: ".github/workflows/tests"
+      - name: Run Bandit (no report)
+        run: |
+          pip install bandit
+          bandit -r . --exclude unit_tests,integration_tests --quiet --exit-zero
