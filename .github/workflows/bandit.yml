@@ -1,0 +1,21 @@
+name: Bandit
+
+on: [push, pull_request]
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      # required for all workflows
+      security-events: write
+      # only required for workflows in private repositories
+      actions: read
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Run Bandit (no report)
+        run: |
+          pip install bandit
+          bandit -r . --exclude unit_tests,integration_tests --quiet --exit-zero
