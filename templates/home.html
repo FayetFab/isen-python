@@ -91,6 +91,29 @@
       </div>
     </div>
   </section>
+  <!-- Filter Form-->
+  <form method="get" class="mb-4 text-center">
+    <div class="form-row justify-content-center">
+      <div class="col-auto">
+        <label for="min_price" class="mr-2">Min Price:</label>
+        <input type="number" name="min_price" class="form-control" placeholder="Min Price" value="{{ request.GET.min_price }}">
+      </div>
+      <div class="col-auto">
+        <label for="max_price" class="mr-2">Max Price:</label>
+        <input type="number" name="max_price" class="form-control" placeholder="Max Price" value="{{ request.GET.max_price }}">
+      </div>
+      <div class="col-auto">
+        <select name="sort" class="form-control">
+          <option value="">Sort by Price</option>
+          <option value="asc" {% if request.GET.sort == 'asc' %}selected{% endif %}>Ascending</option>
+          <option value="desc" {% if request.GET.sort == 'desc' %}selected{% endif %}>Descending</option>
+        </select>
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Apply</button>
+      </div>
+    </div>
+  </form>
   <!-- Portfolio Modal-->
   {% for product in object_list %}
   <div
