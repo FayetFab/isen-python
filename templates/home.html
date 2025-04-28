@@ -92,26 +92,21 @@
     </div>
   </section>
   <!-- Filter Form-->
-  <form method="get" class="mb-4 text-center">
-    <div class="form-row justify-content-center">
-      <div class="col-auto">
-        <label for="min_price" class="mr-2">Min Price:</label>
-        <input type="number" name="min_price" class="form-control" placeholder="Min Price" value="{{ request.GET.min_price }}">
-      </div>
-      <div class="col-auto">
-        <label for="max_price" class="mr-2">Max Price:</label>
-        <input type="number" name="max_price" class="form-control" placeholder="Max Price" value="{{ request.GET.max_price }}">
-      </div>
-      <div class="col-auto">
-        <select name="sort" class="form-control">
-          <option value="">Sort by Price</option>
-          <option value="asc" {% if request.GET.sort == 'asc' %}selected{% endif %}>Ascending</option>
-          <option value="desc" {% if request.GET.sort == 'desc' %}selected{% endif %}>Descending</option>
-        </select>
-      </div>
-      <div class="col-auto">
-        <button type="submit" class="btn btn-primary">Apply</button>
-      </div>
+  <form method="get" class="text-center mb-4">
+    <div class="form-inline justify-content-center">
+      <label for="min_price" class="mr-2">Min Price:</label>
+      <input type="number" name="min_price" id="min_price" class="form-control mx-2" value="{{ request.GET.min_price|default:'' }}">
+  
+      <label for="max_price" class="mr-2">Max Price:</label>
+      <input type="number" name="max_price" id="max_price" class="form-control mx-2" value="{{ request.GET.max_price|default:'' }}">
+  
+      <select name="sort" class="form-control mx-2" aria-label="Sort by price">
+        <option value="">Sort by</option>
+        <option value="asc" {% if request.GET.sort == "asc" %}selected{% endif %}>Ascending</option>
+        <option value="desc" {% if request.GET.sort == "desc" %}selected{% endif %}>Descending</option>
+      </select>
+  
+      <button type="submit" class="btn btn-primary mx-2">Apply</button>
     </div>
   </form>
   <!-- Portfolio Modal-->
