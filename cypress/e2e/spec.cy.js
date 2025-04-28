@@ -21,7 +21,7 @@ describe('Create and connect to an account', () => {
     cy.get('[id^=your_pass]').type('1hstesh<23456789')
     cy.get('form').contains('Log in').click()
     cy.url().should('include', '/home')
-    cy.contains('FAVOURITE')
+    cy.contains('FAVOURITE') 
   })
 })
 
