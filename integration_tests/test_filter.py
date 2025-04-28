@@ -6,7 +6,7 @@ import pytest
 
 
 @pytest.fixture
-def create_products():
+def create_products(db):
     """
     Creation of products
     """
@@ -39,7 +39,7 @@ def test_ui_contains_filter_and_sort_fields(client):
 
 
 @pytest.mark.django_db
-def test_combined_price_filter_and_sort(client, setup_products):
+def test_combined_price_filter_and_sort(client, create_products):
     """
     Integration test to verify filtering by price range and sorting works correctly together.
     """
@@ -62,7 +62,7 @@ def test_combined_price_filter_and_sort(client, setup_products):
 
 
 @pytest.mark.django_db
-def test_sort_descending(client, setup_products):
+def test_sort_descending(client, create_products):
     """
     Integration test to verify sorting alone works in descending order.
     """
@@ -78,7 +78,7 @@ def test_sort_descending(client, setup_products):
 
 
 @pytest.mark.django_db
-def test_sort_ascending(client, setup_products):
+def test_sort_ascending(client, create_products):
     """
     Integration test to verify sorting alone works in ascending order.
     """
