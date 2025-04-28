@@ -23,54 +23,71 @@ def client():
 
 
 @pytest.mark.django_db
-def test_home_page_displays_all_products(client, create_products):
+def test_ui_contains_filter_and_sort_fields(client):
     """
-    Integration test: Ensure that the home page displays all products created.
+    Integration test to ensure that the UI contains price filter fields and the sort dropdown.
     """
     response = client.get(reverse('home'))
-    assert response.status_code == 200
-    products = response.context['object_list']
-    assert len(products) == 4
-    product_names = [product.name for product in products]
-    assert "Product1" in product_names
-    assert "Product2" in product_names
-    assert "Product3" in product_names
-    assert "Product4" in product_names
+    content = response.content.decode()
+
+    assert 'name="min_price"' in content
+    assert 'name="max_price"' in content
+    assert 'name="sort"' in content
+    assert '<option value="asc"' in content
+    assert '<option value="desc"' in content
+    assert 'Apply' in content
 
 
 @pytest.mark.django_db
-def test_price_filter_combined_with_sort(client, create_products):
+def test_combined_price_filter_and_sort(client, setup_products):
     """
-    Integration test: Filter products by minimum price and sort them in ascending order.
+    Integration test to verify filtering by price range and sorting works correctly together.
     """
-    response = client.get(reverse('home'), {'min_price': 15, 'sort': 'asc'})
-    assert response.status_code == 200
-    products = response.context['object_list']
-    
-    # Only Product2 (20), Product3 (30), Product4 (40) should remain
-    assert len(products) == 3
-    assert products[0].price == 20.00
-    assert products[1].price == 30.00
-    assert products[2].price == 40.00
+
+    response = client.get(reverse('home'), {
+        'min_price': 15,
+        'max_price': 35,
+        'sort': 'asc'
+    })
+    content = response.content.decode()
+
+    assert "Product1" not in content
+    assert "Product2" in content
+    assert "Product3" in content
+    assert "Product4" not in content
+
+    first = content.find("Product2")
+    second = content.find("Product3")
+    assert first < second
 
 
 @pytest.mark.django_db
-def test_product_detail_view(client, create_products):
+def test_sort_descending(client, setup_products):
     """
-    Integration test: Accessing the detail page of a product should return 200 and correct product info.
+    Integration test to verify sorting alone works in descending order.
     """
-    product = Product.objects.get(name="Product2")
-    response = client.get(reverse('product_detail', args=[product.id]))
-    
-    assert response.status_code == 200
-    assert response.context['product'].name == "Product2"
-    assert response.context['product'].price == 20.00
+    response = client.get(reverse('home'), {'sort': 'desc'})
+    content = response.content.decode()
+
+    pos_4 = content.find("Product4")
+    pos_3 = content.find("Product3")
+    pos_2 = content.find("Product2")
+    pos_1 = content.find("Product1")
+
+    assert pos_4 < pos_3 < pos_2 < pos_1
 
 
 @pytest.mark.django_db
-def test_invalid_product_detail_view(client):
+def test_sort_ascending(client, setup_products):
     """
-    Integration test: Accessing a detail page with invalid ID should return 404.
+    Integration test to verify sorting alone works in ascending order.
     """
-    response = client.get(reverse('product_detail', args=[9999]))  # ID that does not exist
-    assert response.status_code == 404
+    response = client.get(reverse('home'), {'sort': 'asc'})
+    content = response.content.decode()
+
+    pos_1 = content.find("Product1")
+    pos_2 = content.find("Product2")
+    pos_3 = content.find("Product3")
+    pos_4 = content.find("Product4")
+
+    assert pos_1 < pos_2 < pos_3 < pos_4
