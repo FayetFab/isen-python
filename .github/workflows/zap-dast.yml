@@ -4,20 +4,17 @@ on: [push, pull_request]
 jobs:
   zap-scan:
     runs-on: ubuntu-latest
-    continue-on-error: true  # Ne pas bloquer le workflow
+    continue-on-error: true 
 
     steps:
-      # Étape 1 : Setup de base
       - uses: actions/checkout@v4
 
-      # Étape 2 : Build et lancement de l'app
       - name: Build and run app
         run: |
           docker build -t isen-python .
           docker run -d --name app -p 8080:8080 isen-python
           sleep 25  # Délai adapté aux apps lentes
 
-      # Étape 3 : Vérifications PRÉ-scan (debug critique)
       - name: Pre-scan debug
         run: |
           echo "=== Conteneurs en cours ==="
@@ -29,20 +26,18 @@ jobs:
           echo "=== Fichiers dans /app ==="
           docker exec app ls -la /app || true
 
-      # Étape 4 : Scan ZAP
-      - name: ZAP Scan
+      - name: Run ZAP Scan
         run: |
           docker run --rm \
-            --network host \
+            --user $(id -u):$(id -g) \  # Utilise les permissions de l'hôte
             -v $(pwd):/zap/wrk/:rw \
+            -e ZAP_JVM_ARGS="-DZAP.permissions.all=true" \  # Force les permissions
             ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
             -t http://localhost:8080 \
-            -m 2 -j -l PASS -a \
-            -J zap-report.json \
-            -x report.xml
+            -m 2 -j -l PASS \
+            -J /zap/wrk/zap-report.json
 
-      # Étape 5 : Vérifications POST-scan (debug si échec)
       - name: Post-scan debug
         if: failure()  # Ne s'exécute QUE si le scan échoue
         run: |
@@ -51,7 +46,6 @@ jobs:
           echo "=== Logs ZAP (si existants) ==="
           cat zap.log || echo "Aucun log ZAP trouvé"
 
-      # Étape 6 : Upload des résultats (même partiels)
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
