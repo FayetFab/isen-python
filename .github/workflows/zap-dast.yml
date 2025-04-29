@@ -1,44 +1,63 @@
 name: ZAP DAST Scan
-
-on:
-  push:
-    branches: [main]
-  pull_request:
+on: [push, pull_request]
 
 jobs:
   zap-scan:
     runs-on: ubuntu-latest
-    continue-on-error: true
+    continue-on-error: true  # Ne pas bloquer le workflow
 
     steps:
+      # Étape 1 : Setup de base
       - uses: actions/checkout@v4
 
-      - name: Build and run
+      # Étape 2 : Build et lancement de l'app
+      - name: Build and run app
         run: |
           docker build -t isen-python .
           docker run -d --name app -p 8080:8080 isen-python
-          sleep 25  # Délai augmenté pour les apps lentes
+          sleep 25  # Délai adapté aux apps lentes
 
-      - name: Verify app
+      # Étape 3 : Vérifications PRÉ-scan (debug critique)
+      - name: Pre-scan debug
         run: |
+          echo "=== Conteneurs en cours ==="
           docker ps -a
-          curl -v http://localhost:8080 || docker logs app
+          echo "=== Logs de l'application ==="
+          docker logs app || true
+          echo "=== Accès à l'application ==="
+          curl -v http://localhost:8080 || true
+          echo "=== Fichiers dans /app ==="
+          docker exec app ls -la /app || true
 
-      - name: ZAP Scan with resource limits
+      # Étape 4 : Scan ZAP
+      - name: ZAP Scan
         run: |
           docker run --rm \
-            --memory="2g" \
-            --cpus="1.5" \
+            --network host \
             -v $(pwd):/zap/wrk/:rw \
-            -e ZAP_AUTH_HEADER="X-API-KEY" \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
             -t http://localhost:8080 \
-            -m 1 -j -l PASS -a
+            -m 2 -j -l PASS -a \
+            -J zap-report.json \
+            -x report.xml
 
-      - name: Upload results
+      # Étape 5 : Vérifications POST-scan (debug si échec)
+      - name: Post-scan debug
+        if: failure()  # Ne s'exécute QUE si le scan échoue
+        run: |
+          echo "=== Fichiers générés par ZAP ==="
+          ls -la | grep -E 'zap|report'
+          echo "=== Logs ZAP (si existants) ==="
+          cat zap.log || echo "Aucun log ZAP trouvé"
+
+      # Étape 6 : Upload des résultats (même partiels)
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: zap-results
-          path: zap-report.json
-        if: always()
+          path: |
+            zap-report.json
+            report.xml
+            zap.log
+        if: always()  # Upload même en cas d'échec
