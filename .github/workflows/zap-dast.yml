@@ -3,56 +3,42 @@ name: ZAP DAST Scan
 on:
   push:
     branches: [main]
-
-permissions:
-  contents: read
-  security-events: write
-  issues: write
+  pull_request:
 
 jobs:
-  zap-baseline:
+  zap-scan:
     runs-on: ubuntu-latest
-    continue-on-error: true  
+    continue-on-error: true
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Build app image
+      - name: Build and run
         run: |
-          docker build -t isen-python:latest .
-          docker image ls
+          docker build -t isen-python .
+          docker run -d --name app -p 8080:8080 isen-python
+          sleep 25  # Délai augmenté pour les apps lentes
 
-      - name: Run app container 
+      - name: Verify app
         run: |
-          docker run -d \
-            --name classcapture \
-            -p 8080:8080 \
-            isen-python:latest \
-            python manage.py runserver 0.0.0.0:8080
+          docker ps -a
+          curl -v http://localhost:8080 || docker logs app
 
-      - name: Wait for app
+      - name: ZAP Scan with resource limits
         run: |
-          for i in {1..12}; do
-            if curl -sSf http://localhost:8080 >/dev/null; then
-              echo "App is ready!"
-              exit 0
-            fi
-            sleep 5
-          done
-          echo "App startup timeout"
-          docker logs classcapture || true
-          exit 0
+          docker run --rm \
+            --memory="2g" \
+            --cpus="1.5" \
+            -v $(pwd):/zap/wrk/:rw \
+            -e ZAP_AUTH_HEADER="X-API-KEY" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py \
+            -t http://localhost:8080 \
+            -m 1 -j -l PASS -a
 
-      - name: ZAP baseline scan (1min)
-        uses: zaproxy/action-baseline@v0.14.0
-        with:
-          target: 'http://localhost:8080'
-          cmd_options: '-m 1 -j -l PASS -I' 
-
-      - name: Upload ZAP report
+      - name: Upload results
         uses: actions/upload-artifact@v4
         with:
-          name: zap-dast-report
+          name: zap-results
           path: zap-report.json
         if: always()
