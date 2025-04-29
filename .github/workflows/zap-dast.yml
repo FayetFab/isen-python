@@ -20,8 +20,7 @@ jobs:
       - name: Run the Docker container
         run: |
           docker run --rm -d -p 8080:8080 python-app
-          # Use wait-for-it to check if the application is ready
-          ./wait-for-it.sh localhost:8080 -t 30 -- echo "Application is ready"
+          sleep 10
 
       - name: Run ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.14.0
