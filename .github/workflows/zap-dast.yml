@@ -23,7 +23,7 @@ jobs:
           docker build -t isen-python:latest .
           docker image ls
 
-      - name: Run app container
+      - name: Run app container 
         run: |
           docker run -d \
             --name classcapture \
