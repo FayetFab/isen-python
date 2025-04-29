@@ -20,6 +20,7 @@ jobs:
       - name: Run the Docker container
         run: |
           docker run --rm -d -p 8080:8080 python-app
+          # wait a few seconds before the app start
           sleep 10
 
       - name: Run ZAP Baseline Scan
